@@ -1,24 +1,13 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
+	"crud-server/init/cmd"
+	"flag"
 )
 
+var configPathFlag = flag.String("config", "./config.toml", "config file not found")
+
 func main() {
-	http.HandleFunc("/", helloHandler)
-
-	err := http.ListenAndServe(":8080", nil)
-	if err != nil {
-		fmt.Println("Error starting server:", err)
-		return
-	}
-}
-
-func helloHandler(w http.ResponseWriter, r *http.Request) {
-	_, err := w.Write([]byte("Hello World!"))
-	if err != nil {
-		fmt.Println("Error writing response:", err)
-		return
-	}
+	flag.Parse()
+	cmd.NewCmd(*configPathFlag)
 }
