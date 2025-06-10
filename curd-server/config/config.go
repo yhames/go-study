@@ -12,7 +12,7 @@ type Config struct {
 }
 
 func NewConfig(filePath string) *Config {
-	c := new(Config)
+	config := new(Config)
 
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -20,9 +20,9 @@ func NewConfig(filePath string) *Config {
 	}
 	defer file.Close() // Ensure the file is closed after reading
 
-	err = toml.NewDecoder(file).Decode(c)
+	err = toml.NewDecoder(file).Decode(config)
 	if err != nil {
 		panic(err)
 	}
-	return c
+	return config
 }

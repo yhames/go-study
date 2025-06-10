@@ -29,14 +29,14 @@ func newUserRouter(router *Network) *userRouter {
 	return userRouterInstance
 }
 
-func (u *userRouter) create(c *gin.Context) {
+func (u *userRouter) create(context *gin.Context) {
 }
 
-func (u *userRouter) get(c *gin.Context) {
+func (u *userRouter) get(context *gin.Context) {
 }
 
-func (u *userRouter) update(c *gin.Context) {
+func (u *userRouter) update(context *gin.Context) {
 }
 
-func (u *userRouter) delete(c *gin.Context) {
+func (u *userRouter) delete(context *gin.Context) {
 }

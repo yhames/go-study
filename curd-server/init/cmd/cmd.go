@@ -11,10 +11,13 @@ type Cmd struct {
 }
 
 func NewCmd(filePath string) *Cmd {
-	c := &Cmd{
+	cmd := &Cmd{
 		config:  config.NewConfig(filePath),
 		network: network.NewNetwork(),
 	}
-	c.network.StartServer(c.config.Server.Port)
-	return c
+	err := cmd.network.StartServer(cmd.config.Server.Port)
+	if err != nil {
+		panic(err)
+	}
+	return cmd
 }
