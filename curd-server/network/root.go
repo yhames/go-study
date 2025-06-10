@@ -7,9 +7,13 @@ type Network struct {
 }
 
 func NewNetwork() *Network {
-	return &Network{
+	router := &Network{
 		engine: gin.New(),
 	}
+
+	newUserRouter(router)
+
+	return router
 }
 
 func (n *Network) StartServer(port string) error {
