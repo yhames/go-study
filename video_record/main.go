@@ -65,7 +65,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 /**
- * ffmpeg는 비디오 파일을 변환하는 데 사용되는 도구
+ * ffmpeg는 비디오 파일을 변환하는 데 사용되는 CLI 도구
  * 반드시 ffmpeg가 시스템에 설치되어 있어야 하며, PATH에 추가되어 있어야 합니다.
  */
 func convertWebmToMp4(inputPath string, outputPath string) error {
