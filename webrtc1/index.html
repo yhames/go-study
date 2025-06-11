@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real Time WebRTC</title>
+</head>
+
+<body>
+<h1>Real Time WebRTC</h1>
+
+<video id="localVideo" autoplay></video>
+<video id="remoteVideo" autoplay></video>
+
+<div>
+    <!-- local button을 누르면 영상 캡쳐를 시작합니다. -->
+    <button id="startButton">Start</button>
+    <!-- remote button을 누르면 webRTC 통신으로 remoteVideo에 영상을 보여줍니다. -->
+    <button id="remoteButton">Remote</button>
+    <button id="cancelButton">Cancel</button>
+</div>
+
+<script src="js/main.js"></script>
+</body>
+</html>
