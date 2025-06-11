@@ -69,7 +69,7 @@
 
     async function uploadVideo(blob) {
         const formData = new FormData();
-        formData.append("video", blob, "video.webm");
+        formData.append("video", blob, "video.webm");   // append(name, value, filename)
 
         try {
             const res = await fetch("/upload", {
@@ -84,9 +84,10 @@
 
                 a.href = downloadUrl;
                 a.download = "recored_video.mp4";
-                a.clock();
+                a.click();
             } else {
-                console.log("Failed to upload video", err);
+                let errMsg = await res.json();
+                console.log("Failed to upload video", errMsg);
             }
         } catch (err) {
             console.log("Failed to upload video", err);
