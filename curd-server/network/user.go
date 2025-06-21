@@ -35,12 +35,12 @@ func newUserRouter(router *Network, userService *service.UserService) *userRoute
 func (userRouter *userRouter) create(context *gin.Context) {
 	var request types.CreateUserRequest
 	if err := context.ShouldBindJSON(&request); err != nil {
-		userRouter.router.ResponseFailed(context, err)
+		userRouter.router.ResponseFailed(context, err.Error())
 		return
 	}
 	err := userRouter.userService.Create(request.ToUser())
 	if err != nil {
-		userRouter.router.ResponseFailed(context, err)
+		userRouter.router.ResponseFailed(context, err.Error())
 	}
 	userRouter.router.ResponseOk(context, "User created successfully")
 }
@@ -53,12 +53,12 @@ func (userRouter *userRouter) get(context *gin.Context) {
 func (userRouter *userRouter) update(context *gin.Context) {
 	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
 	if err != nil {
-		userRouter.router.ResponseFailed(context, err)
+		userRouter.router.ResponseFailed(context, err.Error())
 		return
 	}
 	var request types.UpdateUserRequest
 	if err := context.ShouldBindJSON(&request); err != nil {
-		userRouter.router.ResponseFailed(context, err)
+		userRouter.router.ResponseFailed(context, err.Error())
 		return
 	}
 	err = userRouter.userService.Update(id, &types.User{
@@ -67,7 +67,7 @@ func (userRouter *userRouter) update(context *gin.Context) {
 		Age:   request.Age,
 	})
 	if err != nil {
-		userRouter.router.ResponseFailed(context, err)
+		userRouter.router.ResponseFailed(context, err.Error())
 		return
 	}
 	userRouter.router.ResponseOk(context, "User updated successfully")
@@ -76,12 +76,12 @@ func (userRouter *userRouter) update(context *gin.Context) {
 func (userRouter *userRouter) delete(context *gin.Context) {
 	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
 	if err != nil {
-		userRouter.router.ResponseFailed(context, err)
+		userRouter.router.ResponseFailed(context, err.Error())
 		return
 	}
 	err = userRouter.userService.Delete(id)
 	if err != nil {
-		userRouter.router.ResponseFailed(context, err)
+		userRouter.router.ResponseFailed(context, err.Error())
 		return
 	}
 	userRouter.router.ResponseOk(context, "User deleted successfully")
