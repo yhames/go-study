@@ -18,9 +18,9 @@ func NewNetwork(service *service.Service) *Network {
 	return router
 }
 
-func (n *Network) StartServer(port string) error {
+func (network *Network) StartServer(port string) error {
 	if port == "" {
 		port = ":8080" // Default port
 	}
-	return n.engine.Run(port)
+	return network.engine.Run(port)
 }

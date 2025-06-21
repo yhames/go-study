@@ -3,8 +3,8 @@ package network
 import (
 	"crud-server/service"
 	"crud-server/types"
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"strconv"
 	"sync"
 )
 
@@ -24,41 +24,65 @@ func newUserRouter(router *Network, userService *service.UserService) *userRoute
 			router:      router,
 			userService: userService,
 		}
-
 		userRouterInstance.router.engine.POST("/create", userRouterInstance.create)
 		userRouterInstance.router.engine.GET("/", userRouterInstance.get)
-		userRouterInstance.router.engine.PATCH("/update", userRouterInstance.update)
-		userRouterInstance.router.engine.DELETE("/delete", userRouterInstance.delete)
+		userRouterInstance.router.engine.PATCH("/update/:id", userRouterInstance.update)
+		userRouterInstance.router.engine.DELETE("/delete/:id", userRouterInstance.delete)
 	})
 	return userRouterInstance
 }
 
-func (u *userRouter) create(context *gin.Context) {
-	fmt.Println("userRouter.create")
-	u.router.ResponseOk(context, "User created successfully")
+func (userRouter *userRouter) create(context *gin.Context) {
+	var request types.CreateUserRequest
+	if err := context.ShouldBindJSON(&request); err != nil {
+		userRouter.router.ResponseFailed(context, err)
+		return
+	}
+	err := userRouter.userService.Create(request.ToUser())
+	if err != nil {
+		userRouter.router.ResponseFailed(context, err)
+	}
+	userRouter.router.ResponseOk(context, "User created successfully")
 }
 
-func (u *userRouter) get(context *gin.Context) {
-	fmt.Println("userRouter.get")
-	u.router.ResponseOk(context, &types.UserResponse{
-		ApiResponse: &types.ApiResponse{
-			Status:  200,
-			Message: "User retrieved successfully",
-		},
-		User: types.User{
-			Name:  "John Doe",
-			Email: "johndoe@google.com",
-			Age:   30,
-		},
+func (userRouter *userRouter) get(context *gin.Context) {
+	users := userRouter.userService.FindAll()
+	userRouter.router.ResponseOk(context, users)
+}
+
+func (userRouter *userRouter) update(context *gin.Context) {
+	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	if err != nil {
+		userRouter.router.ResponseFailed(context, err)
+		return
+	}
+	var request types.UpdateUserRequest
+	if err := context.ShouldBindJSON(&request); err != nil {
+		userRouter.router.ResponseFailed(context, err)
+		return
+	}
+	err = userRouter.userService.Update(id, &types.User{
+		Name:  request.Name,
+		Email: request.Email,
+		Age:   request.Age,
 	})
+	if err != nil {
+		userRouter.router.ResponseFailed(context, err)
+		return
+	}
+	userRouter.router.ResponseOk(context, "User updated successfully")
 }
 
-func (u *userRouter) update(context *gin.Context) {
-	fmt.Println("userRouter.update")
-	u.router.ResponseOk(context, "User updated successfully")
-}
-
-func (u *userRouter) delete(context *gin.Context) {
-	fmt.Println("userRouter.delete")
-	u.router.ResponseOk(context, "User deleted successfully")
+func (userRouter *userRouter) delete(context *gin.Context) {
+	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	if err != nil {
+		userRouter.router.ResponseFailed(context, err)
+		return
+	}
+	err = userRouter.userService.Delete(id)
+	if err != nil {
+		userRouter.router.ResponseFailed(context, err)
+		return
+	}
+	userRouter.router.ResponseOk(context, "User deleted successfully")
 }
