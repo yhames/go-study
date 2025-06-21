@@ -23,7 +23,7 @@ func (userRepository *UserService) FindAll() []*types.User {
 	return userRepository.userRepository.FindAll()
 }
 
-func (userRepository *UserService) FindById(id int64) *types.User {
+func (userRepository *UserService) FindById(id int64) (*types.User, error) {
 	return userRepository.userRepository.FindById(id)
 }
 

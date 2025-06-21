@@ -2,6 +2,7 @@ package repository
 
 import (
 	"crud-server/types"
+	"errors"
 	"sync/atomic"
 )
 
@@ -27,13 +28,13 @@ func (userRepository *UserRepository) FindAll() []*types.User {
 	return userRepository.UserMap
 }
 
-func (userRepository *UserRepository) FindById(id int64) *types.User {
+func (userRepository *UserRepository) FindById(id int64) (*types.User, error) {
 	for _, u := range userRepository.UserMap {
 		if u.Id == id {
-			return u
+			return u, nil
 		}
 	}
-	return nil
+	return nil, errors.New("user not found")
 }
 
 func (userRepository *UserRepository) Update(id int64, updateUser *types.User) error {
@@ -45,7 +46,7 @@ func (userRepository *UserRepository) Update(id int64, updateUser *types.User) e
 			return nil
 		}
 	}
-	return nil
+	return errors.New("user not found")
 }
 
 func (userRepository *UserRepository) Delete(id int64) error {
@@ -55,7 +56,7 @@ func (userRepository *UserRepository) Delete(id int64) error {
 			return nil
 		}
 	}
-	return nil
+	return errors.New("user not found")
 }
 
 func nextSeq() int64 {
