@@ -2,7 +2,7 @@ package repository
 
 import (
 	"crud-server/types"
-	"errors"
+	"crud-server/types/errors"
 	"sort"
 	"sync/atomic"
 )
@@ -22,7 +22,7 @@ func newUserRepository() *UserRepository {
 func (userRepository *UserRepository) Create(user *types.User) error {
 	user.Id = nextSeq()
 	if (userRepository.UserMap[user.Id]) != nil {
-		return errors.New("user already exists")
+		return errors.Errorf(errors.NotFoundUser, nil)
 	}
 	userRepository.UserMap[user.Id] = user
 	return nil
@@ -42,7 +42,7 @@ func (userRepository *UserRepository) FindAll() []*types.User {
 func (userRepository *UserRepository) FindById(id int64) (*types.User, error) {
 	user, exists := userRepository.UserMap[id]
 	if !exists {
-		return nil, errors.New("user not found")
+		return nil, errors.Errorf(errors.NotFoundUser, nil)
 	}
 	return user, nil
 }
@@ -50,7 +50,7 @@ func (userRepository *UserRepository) FindById(id int64) (*types.User, error) {
 func (userRepository *UserRepository) Update(id int64, updateUser *types.User) error {
 	user, exists := userRepository.UserMap[id]
 	if !exists {
-		return errors.New("user not found")
+		return errors.Errorf(errors.NotFoundUser, nil)
 	}
 	user.Name = updateUser.Name
 	user.Email = updateUser.Email
@@ -61,7 +61,7 @@ func (userRepository *UserRepository) Update(id int64, updateUser *types.User) e
 func (userRepository *UserRepository) Delete(id int64) error {
 	_, exists := userRepository.UserMap[id]
 	if !exists {
-		return errors.New("user not found")
+		return errors.Errorf(errors.NotFoundUser, nil)
 	}
 	delete(userRepository.UserMap, id)
 	return nil
