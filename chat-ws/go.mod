@@ -6,7 +6,6 @@ require (
 	github.com/gin-contrib/cors v1.7.6
 	github.com/gin-gonic/gin v1.10.1
 	github.com/gorilla/websocket v1.5.3
-	golang.org/x/net v0.41.0
 )
 
 require (
