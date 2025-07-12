@@ -8,8 +8,8 @@ import (
 	"log"
 )
 
-type Network struct {
-	engin *gin.Engine
+type Server struct {
+	engine *gin.Engine
 
 	service    *service.Service
 	repository *repository.Repository
@@ -18,16 +18,16 @@ type Network struct {
 	ip   string
 }
 
-func NewServer(service *service.Service, repository *repository.Repository, port string) *Network {
-	n := &Network{
-		engin:      gin.New(),
+func NewServer(service *service.Service, repository *repository.Repository, port string) *Server {
+	s := &Server{
+		engine:     gin.New(),
 		service:    service,
 		repository: repository,
 		port:       port,
 	}
-	n.engin.Use(gin.Logger())
-	n.engin.Use(gin.Recovery())
-	n.engin.Use(cors.New(cors.Config{
+	s.engine.Use(gin.Logger())
+	s.engine.Use(gin.Recovery())
+	s.engine.Use(cors.New(cors.Config{
 		AllowWebSockets:  true,
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PUT"},
@@ -37,12 +37,13 @@ func NewServer(service *service.Service, repository *repository.Repository, port
 
 	r := NewRoom()
 	go r.RunInit()
-	n.engin.GET("/room", r.SocketServe)
+	registerServer(s)
+	s.engine.GET("/room", r.SocketServe)
 
-	return n
+	return s
 }
 
-func (n *Network) Start() error {
+func (n *Server) Start() error {
 	log.Println("Starting server...")
-	return n.engin.Run(n.port)
+	return n.engine.Run(n.port)
 }
