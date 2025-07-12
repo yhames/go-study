@@ -1,10 +1,28 @@
 package main
 
-import "chat-ws/network"
+import (
+	"chat-ws/config"
+	"chat-ws/network"
+	"chat-ws/repository"
+	"chat-ws/service"
+	"flag"
+)
+
+var configPath = flag.String("config", "./config.toml", "config set")
+var port = flag.String("port", ":8080", "port set")
 
 func main() {
-	server := network.NewServer()
-	err := server.Start()
+	flag.Parse()
+	c := config.NewConfig(*configPath)
+	r, err := repository.NewRepository(c)
+	if err != nil {
+		panic(err)
+	}
+
+	sv := service.NewService(r)
+
+	s := network.NewServer(sv, r, *port)
+	err = s.Start()
 	if err != nil {
 		panic(err)
 	}

@@ -1,0 +1,3 @@
+[db]
+database = "chatting"
+url = "root:root@tcp(localhost:3306)/chatting?multiStatements=true&parseTime=true"

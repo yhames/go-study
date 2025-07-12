@@ -1,6 +1,8 @@
 package network
 
 import (
+	"chat-ws/repository"
+	"chat-ws/service"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -8,11 +10,20 @@ import (
 
 type Network struct {
 	engin *gin.Engine
+
+	service    *service.Service
+	repository *repository.Repository
+
+	port string
+	ip   string
 }
 
-func NewServer() *Network {
+func NewServer(service *service.Service, repository *repository.Repository, port string) *Network {
 	n := &Network{
-		engin: gin.New(),
+		engin:      gin.New(),
+		service:    service,
+		repository: repository,
+		port:       port,
 	}
 	n.engin.Use(gin.Logger())
 	n.engin.Use(gin.Recovery())
@@ -33,5 +44,5 @@ func NewServer() *Network {
 
 func (n *Network) Start() error {
 	log.Println("Starting server...")
-	return n.engin.Run(":8080")
+	return n.engin.Run(n.port)
 }
