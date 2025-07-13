@@ -2,7 +2,8 @@ package service
 
 import (
 	"chat-ws/app/repository"
-	schema2 "chat-ws/app/types/schema"
+	"chat-ws/app/types/schema"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"log"
 )
 
@@ -16,6 +17,23 @@ func NewService(rep *repository.Repository) *Service {
 	}
 }
 
+func (s *Service) ServerSet(ip string, available bool) error {
+	err := s.repository.ServerSet(ip, available)
+	if err != nil {
+		log.Println(err)
+	}
+	return err
+}
+
+func (s *Service) Publish(topic string, value []byte, ch chan kafka.Event) (kafka.Event, error) {
+	event, err := s.repository.Kafka.Publish(topic, value, ch)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return event, nil
+}
+
 func (s *Service) InsertChatting(roomName, userName, message string) {
 	err := s.repository.InsertChatting(userName, message, roomName)
 	if err != nil {
@@ -24,7 +42,7 @@ func (s *Service) InsertChatting(roomName, userName, message string) {
 	}
 }
 
-func (s *Service) EnterRoom(roomName string) ([]*schema2.Chat, error) {
+func (s *Service) EnterRoom(roomName string) ([]*schema.Chat, error) {
 	room, err := s.repository.FindRoomByName(roomName)
 	if err != nil {
 		return nil, err
@@ -43,7 +61,7 @@ func (s *Service) CreateRoom(name string) error {
 	return s.repository.CreateRoom(name)
 }
 
-func (s *Service) FindRoomByName(name string) (*schema2.Room, error) {
+func (s *Service) FindRoomByName(name string) (*schema.Room, error) {
 	room, err := s.repository.FindRoomByName(name)
 	if err != nil {
 		return nil, err
@@ -54,7 +72,7 @@ func (s *Service) FindRoomByName(name string) (*schema2.Room, error) {
 	return room, nil
 }
 
-func (s *Service) FindRoomAll() ([]*schema2.Room, error) {
+func (s *Service) FindRoomAll() ([]*schema.Room, error) {
 	rooms, err := s.repository.FindRoomAll()
 	if err != nil {
 		return nil, err

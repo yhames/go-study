@@ -23,6 +23,6 @@ CREATE TABLE IF NOT EXISTS `chat`
 
 CREATE TABLE IF NOT EXISTS `server_info`
 (
-    `id`        VARCHAR(255) NOT NULL PRIMARY KEY,
+    `ip`        VARCHAR(255) NOT NULL PRIMARY KEY,
     `available` BOOLEAN      NOT NULL
 );

@@ -14,7 +14,8 @@ import (
 type Repository struct {
 	config *config.Config
 	db     *sql.DB
-	kafka  *kafka.Kafka
+
+	Kafka *kafka.Kafka
 }
 
 const (
@@ -31,10 +32,16 @@ func NewRepository(c *config.Config) (*Repository, error) {
 	if r.db, err = sql.Open(c.DB.Database, c.DB.Url); err != nil {
 		return nil, err
 	}
-	if r.kafka, err = kafka.NewKafka(r.config); err != nil {
+	if r.Kafka, err = kafka.NewKafka(r.config); err != nil {
 		return nil, err
 	}
 	return r, nil
+}
+
+func (s *Repository) ServerSet(ip string, available bool) error {
+	qs := "INSERT INTO chatting.server_info(`ip`, `available`) VALUES (?, ?) ON DUPLICATE KEY UPDATE available = VALUES(available)"
+	_, err := s.db.Exec(qs, ip, available)
+	return err
 }
 
 func (s *Repository) InsertChatting(user, message, roomName string) error {

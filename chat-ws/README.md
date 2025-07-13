@@ -1,5 +1,7 @@
 # Websocket 채팅서버
 
+./kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic --from-beginning
+
 ## 트러블슈팅
 
 ### 윈도우에서 `confluent-kafka-go` 패키지 참조 오류
