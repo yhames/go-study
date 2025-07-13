@@ -1,10 +1,10 @@
 package main
 
 import (
-	"chat-ws/config"
-	"chat-ws/network"
-	"chat-ws/repository"
-	"chat-ws/service"
+	"chat-ws/src/config"
+	"chat-ws/src/network"
+	"chat-ws/src/repository"
+	"chat-ws/src/service"
 	"flag"
 )
 

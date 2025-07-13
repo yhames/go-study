@@ -1,8 +1,8 @@
 package network
 
 import (
-	"chat-ws/types"
-	"chat-ws/types/schema"
+	types2 "chat-ws/src/types"
+	"chat-ws/src/types/schema"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -37,7 +37,7 @@ func (a *api) getRoomList(c *gin.Context) {
 }
 
 func (a *api) postMakeRoom(c *gin.Context) {
-	var req types.BodyRoomRequest
+	var req types2.BodyRoomRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response(c, http.StatusBadRequest, err.Error())
 		return
@@ -50,7 +50,7 @@ func (a *api) postMakeRoom(c *gin.Context) {
 }
 
 func (a *api) getRoom(c *gin.Context) {
-	var req types.FormRoomRequest
+	var req types2.FormRoomRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
 		response(c, http.StatusBadRequest, err.Error())
 		return
@@ -68,7 +68,7 @@ func (a *api) getRoom(c *gin.Context) {
 }
 
 func (a *api) getEnterRoom(c *gin.Context) {
-	var req types.FormRoomRequest
+	var req types2.FormRoomRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
 		response(c, http.StatusBadRequest, err.Error())
 		return
@@ -86,5 +86,5 @@ func (a *api) getEnterRoom(c *gin.Context) {
 }
 
 func response(c *gin.Context, s int, res interface{}, data ...string) {
-	c.JSON(s, types.NewRes(s, res, data...))
+	c.JSON(s, types2.NewRes(s, res, data...))
 }

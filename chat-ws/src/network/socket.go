@@ -1,8 +1,8 @@
 package network
 
 import (
-	"chat-ws/service"
-	"chat-ws/types"
+	"chat-ws/src/service"
+	"chat-ws/src/types"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"log"

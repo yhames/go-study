@@ -1,8 +1,8 @@
 package service
 
 import (
-	"chat-ws/repository"
-	"chat-ws/types/schema"
+	"chat-ws/src/repository"
+	schema2 "chat-ws/src/types/schema"
 	"log"
 )
 
@@ -24,7 +24,7 @@ func (s *Service) InsertChatting(roomName, userName, message string) {
 	}
 }
 
-func (s *Service) EnterRoom(roomName string) ([]*schema.Chat, error) {
+func (s *Service) EnterRoom(roomName string) ([]*schema2.Chat, error) {
 	room, err := s.repository.FindRoomByName(roomName)
 	if err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ func (s *Service) CreateRoom(name string) error {
 	return s.repository.CreateRoom(name)
 }
 
-func (s *Service) FindRoomByName(name string) (*schema.Room, error) {
+func (s *Service) FindRoomByName(name string) (*schema2.Room, error) {
 	room, err := s.repository.FindRoomByName(name)
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func (s *Service) FindRoomByName(name string) (*schema.Room, error) {
 	return room, nil
 }
 
-func (s *Service) FindRoomAll() ([]*schema.Room, error) {
+func (s *Service) FindRoomAll() ([]*schema2.Room, error) {
 	rooms, err := s.repository.FindRoomAll()
 	if err != nil {
 		return nil, err
