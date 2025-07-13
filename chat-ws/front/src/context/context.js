@@ -4,9 +4,12 @@ class GlobalData {
   socket;
   userName;
 
-  setGlobalData = (socket, userName) => {
+  setUserName = (name) => {
+    this.userName = name;
+  };
+
+  setSocket = (socket) => {
     this.socket = socket;
-    this.userName = userName;
   };
 }
 

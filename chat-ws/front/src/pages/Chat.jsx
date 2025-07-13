@@ -10,7 +10,8 @@ import ChatContainer from "../components/ChatContainer";
 import Contacts from "../components/Contacts";
 import Welcome from "../components/Welcome";
 import { useGlobalData } from "../context/context";
-import { socketHost } from "../utils/APIRoutes";
+import { socketHost, host } from "../utils/APIRoutes";
+import axios from "axios";
 
 export default function Chat() {
   const [cookies] = useCookies(["auth"]);
@@ -19,7 +20,6 @@ export default function Chat() {
   const navigate = useNavigate();
 
   const [initLoading, setInitLoading] = useState(false);
-  const [chatContents, setChatContents] = useState([]);
   const [userId, setUserId] = useState("");
 
   useEffect(() => {
@@ -27,52 +27,20 @@ export default function Chat() {
       navigate("/login");
     } else {
       setUserId(cookies.auth);
-      const socket = new WebSocket(socketHost);
-      storage.setGlobalData(socket, cookies.auth);
-
       setInitLoading(true);
+      storage.setUserName(cookies.auth);
     }
   }, []);
-
-  if (storage.socket) {
-    storage.socket.onmessage = function (e) {
-      const receiveData = JSON.parse(e.data);
-      console.log(receiveData);
-
-      if (chatContents.length === 0) {
-        setChatContents([receiveData]);
-      } else {
-        setChatContents([...chatContents, receiveData]);
-      }
-    };
-
-    storage.socket.onclose = function (e) {
-      console.log(e);
-      alert("서버가 닫혀있기 떄문에 로그아웃 됩니다.");
-
-      document.cookie =
-        "auth" +
-        "=" +
-        ("/" ? ";path=" + "/" : "") +
-        ";expires=Thu, 01 Jan 1970 00:00:01 GMT";
-
-      window.location.replace("/login");
-    };
-  }
 
   return (
     <>
       <Container>
         <div className="container">
           <Contacts userName={userId} />
-          {!initLoading && !storage.room ? (
+          {!initLoading ? (
             <Welcome userName={userId} />
           ) : (
-            <ChatContainer
-              userName={userId}
-              socket={storage.socket}
-              chatContents={chatContents}
-            />
+            <ChatContainer userName={userId} />
           )}
         </div>
       </Container>

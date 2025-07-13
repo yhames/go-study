@@ -2,6 +2,7 @@ package network
 
 import (
 	"chat-ws/types"
+	"chat-ws/types/schema"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -18,12 +19,19 @@ func registerServer(server *Server) {
 	server.engine.GET("/room", a.getRoom)
 	server.engine.GET("/enter-room", a.getEnterRoom)
 
+	r := NewRoom(server.service)
+	go r.RunInit()
+	server.engine.GET("/room-chat", r.SocketServe)
 }
 
 func (a *api) getRoomList(c *gin.Context) {
-	result, err := a.server.repository.FindRoomAll()
+	result, err := a.server.service.FindRoomAll()
 	if err != nil {
 		response(c, http.StatusInternalServerError, err.Error())
+	}
+	if result == nil {
+		response(c, http.StatusOK, []*schema.Room{})
+		return
 	}
 	response(c, http.StatusOK, result)
 }

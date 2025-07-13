@@ -32,6 +32,12 @@ func NewRepository(c *config.Config) (*Repository, error) {
 	return r, nil
 }
 
+func (s *Repository) InsertChatting(user, message, roomName string) error {
+	log.Println("Insert Chatting with wss", "from", user, "message", message, "room", roomName)
+	_, err := s.db.Exec("INSERT INTO chatting.chat(room, name, message) VALUES (?, ?, ?)", roomName, user, message)
+	return err
+}
+
 func (s *Repository) CreateRoom(name string) error {
 	qs := "INSERT INTO chatting.room(name) VALUES (?)"
 	_, err := s.db.Exec(qs, name)

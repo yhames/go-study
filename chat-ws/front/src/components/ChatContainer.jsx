@@ -1,46 +1,158 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import ChatInput from "./ChatInput";
 import Logout from "./Logout";
+import MakeNewRoom from "./MakeNewRoom";
+import { host, socketHost } from "../utils/APIRoutes";
+import axios from "axios";
+import { useGlobalData } from "../context/context";
 
-export default function ChatContainer({ userName, socket, chatContents }) {
+export default function ChatContainer({ userName }) {
+  const [chattingList, setChattingList] = useState([]);
+  const [room, setRoom] = useState(false);
+
+  const [chatContents, setChatContents] = useState([]);
+  const [socketH, setSocketH] = useState(false);
+
+  const storage = useGlobalData();
+
+  useEffect(() => {
+    if (!room) {
+      async function fetchRoomList() {
+        const list = await axios.get(host + "/room-list");
+        setChattingList(list.data.result);
+      }
+
+      fetchRoomList();
+      setChatContents([]);
+      storage.setSocket(false);
+    } else {
+      console.log(room);
+      async function fetchBeforeChat() {
+        const res = await axios.get(host + `/enter-room?name=${room}`);
+        if (chatContents.length === 0) {
+          setChatContents(res.data.result);
+        }
+      }
+
+      fetchBeforeChat();
+
+      const socket = new WebSocket(socketHost);
+      setSocketH(socket);
+    }
+  }, [room]);
+
+  if (socketH) {
+    socketH.onopen = () => {
+      //webSocket이 맺어지고 난 후, 실행
+      console.log(socketH.current.readyState);
+      socketH.current.send("success");
+    };
+
+    socketH.onmessage = function (e) {
+      const receiveData = JSON.parse(e.data);
+
+      console.log(chatContents);
+
+      if (chatContents.length === 0) {
+        setChatContents([receiveData]);
+      } else {
+        setChatContents([...chatContents, receiveData]);
+      }
+    };
+
+    socketH.onclose = function (e) {
+      console.log(e);
+      // alert("서버가 닫혀있기 떄문에 로그아웃 됩니다.");
+
+      // document.cookie =
+      //   "auth" +
+      //   "=" +
+      //   ("/" ? ";path=" + "/" : "") +
+      //   ";expires=Thu, 01 Jan 1970 00:00:01 GMT";
+
+      // window.location.replace("/login");
+    };
+  }
+
   const handleSendMsg = async (msg) => {
-    socket.send(JSON.stringify({ Message: msg }));
+    if (!room) {
+      alert("먼저 방에 입장해 주세요");
+    } else {
+      if (!socketH) {
+        alert("socket 설정이 아직 진행되지 않았습니다.");
+      } else {
+        console.log(socketH);
+        socketH.send(JSON.stringify({ Message: msg, Room: room }));
+      }
+    }
+  };
+
+  const enterRoom = async (name) => {
+    setRoom(name);
+  };
+
+  const goBack = () => {
+    setRoom(false);
   };
 
   return (
     <Container>
       <div className="chat-header">
-        <div className="user-details">
-          <div className="avatar"></div>
-          <div className="username">
-            <h3>채팅방</h3>
+        {!room ? (
+          <div className="user-details">
+            <div className="username">
+              <h3>채팅방 리스트</h3>
+            </div>
+            <MakeNewRoom setChattingList={setChattingList} />
           </div>
-        </div>
+        ) : (
+          <Button onClick={() => goBack()}>뒤로 가기</Button>
+        )}
+
         <Logout />
       </div>
-      <div className="chat-messages">
-        {chatContents.length !== 0
-          ? chatContents.map((result, index) => {
-              console.log(result);
-              const isMyText = result.Name === userName;
-              return (
-                <div
-                  className={`message ${isMyText ? "sended" : "recieved"}`}
-                  key={index}
-                >
-                  <div className="content-box">
-                    <div className="content-header">
-                      <span>{result.Name}</span>
+      <div className="room-list">
+        {!room ? (
+          chattingList.length !== 0 ? (
+            chattingList.map((result, index) => (
+              <div
+                className={`room`}
+                key={index}
+                onClick={() => {
+                  enterRoom(result.name);
+                }}
+              >
+                {result.name}
+              </div>
+            ))
+          ) : (
+            <div>ttest</div>
+          )
+        ) : (
+          <div>
+            {chatContents.length !== 0
+              ? chatContents.map((result, index) => {
+                  const isMyText = result.name === userName;
+                  return (
+                    <div
+                      className={`message ${isMyText ? "sended" : "received"}`}
+                      key={index}
+                    >
+                      <div className="content-box">
+                        <div className="content-header">
+                          <span>{result.name}</span>
+                        </div>
+                        <div className="content">{result.message}</div>
+                      </div>
                     </div>
-                    <div className="content">{result.Message}</div>
-                  </div>
-                </div>
-              );
-            })
-          : null}
+                  );
+                })
+              : null}
+          </div>
+        )}
       </div>
-      <ChatInput handleSendMsg={handleSendMsg} />
+      {room && <ChatInput handleSendMsg={handleSendMsg} />}
     </Container>
   );
 }
@@ -74,12 +186,19 @@ const Container = styled.div`
       }
     }
   }
-  .chat-messages {
+  .room-list {
     padding: 1rem 2rem;
     display: flex;
     flex-direction: column;
     gap: 1rem;
     overflow: auto;
+
+    .room {
+      padding: 1rem 1rem;
+      background-color: yellow;
+      cursor: hover;
+    }
+
     &::-webkit-scrollbar {
       width: 0.2rem;
       &-thumb {
@@ -136,5 +255,20 @@ const Container = styled.div`
         background-color: #9900ff20;
       }
     }
+  }
+`;
+
+const Button = styled.button`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  background-color: #9a86f3;
+  border: none;
+  cursor: pointer;
+  svg {
+    font-size: 1.3rem;
+    color: #ebe7ff;
   }
 `;

@@ -15,7 +15,7 @@ export default function Contacts({ userName }) {
           </div>
         </div>
         <div className="title">
-          <h5>스트리밍 플랫폼의 채팅서버 구현해보기!</h5>
+          <h5>더 강력해진 채팅 어플리케이션</h5>
         </div>
       </Container>
     </>

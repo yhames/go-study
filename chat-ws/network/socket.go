@@ -1,6 +1,7 @@
 package network
 
 import (
+	"chat-ws/service"
 	"chat-ws/types"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -17,34 +18,38 @@ var upgrader = &websocket.Upgrader{
 
 type Room struct {
 	Forward chan *message
-	Join    chan *client
-	Leave   chan *client
-	Clients map[*client]bool
+	Join    chan *Client
+	Leave   chan *Client
+	Clients map[*Client]bool
+
+	service *service.Service
 }
 
 type message struct {
-	Name    string
-	Message string
-	Time    int64
+	Name    string    `json:"name"`
+	Message string    `json:"message"`
+	Room    string    `json:"room"`
+	Time    time.Time `json:"when"`
 }
 
-type client struct {
+type Client struct {
 	Send   chan *message
 	Room   *Room
-	Name   string
+	Name   string `json:"name"`
 	Socket *websocket.Conn
 }
 
-func NewRoom() *Room {
+func NewRoom(service *service.Service) *Room {
 	return &Room{
 		Forward: make(chan *message),
-		Join:    make(chan *client),
-		Leave:   make(chan *client),
-		Clients: make(map[*client]bool),
+		Join:    make(chan *Client),
+		Leave:   make(chan *Client),
+		Clients: make(map[*Client]bool),
+		service: service,
 	}
 }
 
-func (c *client) Read() {
+func (c *Client) Read() {
 	defer func() {
 		if err := c.Socket.Close(); err != nil {
 			log.Printf("socket close error: %v", err)
@@ -59,13 +64,13 @@ func (c *client) Read() {
 				panic(err)
 			}
 		}
-		msg.Time = time.Now().Unix()
+		msg.Time = time.Now()
 		msg.Name = c.Name
 		c.Room.Forward <- msg
 	}
 }
 
-func (c *client) Write() {
+func (c *Client) Write() {
 	defer func() {
 		if err := c.Socket.Close(); err != nil {
 			log.Printf("socket close error: %v", err)
@@ -90,6 +95,7 @@ func (r *Room) RunInit() {
 				delete(r.Clients, client)
 			}
 		case msg := <-r.Forward:
+			go r.service.InsertChatting(msg.Room, msg.Name, msg.Message)
 			for client := range r.Clients {
 				client.Send <- msg
 			}
@@ -113,7 +119,7 @@ func (r *Room) SocketServe(c *gin.Context) {
 	}
 
 	// 클라이언트 생성
-	client := &client{
+	client := &Client{
 		Socket: ws,
 		Send:   make(chan *message, types.MessageBufferSize),
 		Room:   r,

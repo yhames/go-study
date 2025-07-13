@@ -21,7 +21,7 @@ func main() {
 
 	sv := service.NewService(r)
 
-	s := network.NewServer(sv, r, *port)
+	s := network.NewServer(sv, *port)
 	err = s.Start()
 	if err != nil {
 		panic(err)

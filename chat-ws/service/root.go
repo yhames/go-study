@@ -3,6 +3,7 @@ package service
 import (
 	"chat-ws/repository"
 	"chat-ws/types/schema"
+	"log"
 )
 
 type Service struct {
@@ -12,6 +13,14 @@ type Service struct {
 func NewService(rep *repository.Repository) *Service {
 	return &Service{
 		repository: rep,
+	}
+}
+
+func (s *Service) InsertChatting(roomName, userName, message string) {
+	err := s.repository.InsertChatting(userName, message, roomName)
+	if err != nil {
+		log.Println(err)
+		return
 	}
 }
 

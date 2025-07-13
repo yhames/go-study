@@ -1,7 +1,6 @@
 package network
 
 import (
-	"chat-ws/repository"
 	"chat-ws/service"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -11,19 +10,17 @@ import (
 type Server struct {
 	engine *gin.Engine
 
-	service    *service.Service
-	repository *repository.Repository
+	service *service.Service
 
 	port string
 	ip   string
 }
 
-func NewServer(service *service.Service, repository *repository.Repository, port string) *Server {
+func NewServer(service *service.Service, port string) *Server {
 	s := &Server{
-		engine:     gin.New(),
-		service:    service,
-		repository: repository,
-		port:       port,
+		engine:  gin.New(),
+		service: service,
+		port:    port,
 	}
 	s.engine.Use(gin.Logger())
 	s.engine.Use(gin.Recovery())
@@ -35,10 +32,7 @@ func NewServer(service *service.Service, repository *repository.Repository, port
 		AllowCredentials: true,
 	}))
 
-	r := NewRoom()
-	go r.RunInit()
 	registerServer(s)
-	s.engine.GET("/room", r.SocketServe)
 
 	return s
 }
