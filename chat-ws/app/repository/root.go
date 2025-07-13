@@ -2,7 +2,8 @@ package repository
 
 import (
 	"chat-ws/app/config"
-	schema2 "chat-ws/app/types/schema"
+	"chat-ws/app/repository/kafka"
+	"chat-ws/app/types/schema"
 	"database/sql"
 	"errors"
 	_ "github.com/go-sql-driver/mysql" // MySQL driver
@@ -13,6 +14,7 @@ import (
 type Repository struct {
 	config *config.Config
 	db     *sql.DB
+	kafka  *kafka.Kafka
 }
 
 const (
@@ -27,6 +29,9 @@ func NewRepository(c *config.Config) (*Repository, error) {
 	}
 	var err error
 	if r.db, err = sql.Open(c.DB.Database, c.DB.Url); err != nil {
+		return nil, err
+	}
+	if r.kafka, err = kafka.NewKafka(r.config); err != nil {
 		return nil, err
 	}
 	return r, nil
@@ -44,8 +49,8 @@ func (s *Repository) CreateRoom(name string) error {
 	return err
 }
 
-func (s *Repository) FindRoomByName(name string) (*schema2.Room, error) {
-	var d schema2.Room
+func (s *Repository) FindRoomByName(name string) (*schema.Room, error) {
+	var d schema.Room
 	qs := query([]string{"SELECT id, name, created_at, updated_at FROM", room, "WHERE name = ?"})
 	err := s.db.QueryRow(qs, name).Scan(&d.Id, &d.Name, &d.CreatedAt, &d.UpdatedAt)
 	if err != nil {
@@ -57,7 +62,7 @@ func (s *Repository) FindRoomByName(name string) (*schema2.Room, error) {
 	return &d, nil
 }
 
-func (s *Repository) FindRoomAll() ([]*schema2.Room, error) {
+func (s *Repository) FindRoomAll() ([]*schema.Room, error) {
 	qs := query([]string{"SELECT id, name, created_at, updated_at FROM", room})
 	cursor, err := s.db.Query(qs)
 	if err != nil {
@@ -70,9 +75,9 @@ func (s *Repository) FindRoomAll() ([]*schema2.Room, error) {
 		}
 	}()
 
-	var rooms []*schema2.Room
+	var rooms []*schema.Room
 	for cursor.Next() {
-		var d schema2.Room
+		var d schema.Room
 		if err := cursor.Scan(&d.Id, &d.Name, &d.CreatedAt, &d.UpdatedAt); err != nil {
 			return nil, err
 		}
@@ -81,7 +86,7 @@ func (s *Repository) FindRoomAll() ([]*schema2.Room, error) {
 	return rooms, nil
 }
 
-func (s *Repository) FindChatByRoomName(roomName string) ([]*schema2.Chat, error) {
+func (s *Repository) FindChatByRoomName(roomName string) ([]*schema.Chat, error) {
 	qs := query([]string{"SELECT id, room, name, message, send_time FROM", chat, "WHERE room = ? ORDER BY send_time DESC LIMIT 10"})
 	cursor, err := s.db.Query(qs, roomName)
 	if err != nil {
@@ -94,9 +99,9 @@ func (s *Repository) FindChatByRoomName(roomName string) ([]*schema2.Chat, error
 		}
 	}()
 
-	var chats []*schema2.Chat
+	var chats []*schema.Chat
 	for cursor.Next() {
-		var d schema2.Chat
+		var d schema.Chat
 		if err := cursor.Scan(&d.Id, &d.Room, &d.Name, &d.Message, &d.SendTime); err != nil {
 			return nil, err
 		}
