@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"chat-ws/src/config"
-	schema2 "chat-ws/src/types/schema"
+	"chat-ws/app/config"
+	schema2 "chat-ws/app/types/schema"
 	"database/sql"
 	"errors"
 	_ "github.com/go-sql-driver/mysql" // MySQL driver

@@ -1,8 +1,8 @@
 package network
 
 import (
-	types2 "chat-ws/src/types"
-	"chat-ws/src/types/schema"
+	types2 "chat-ws/app/types"
+	"chat-ws/app/types/schema"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

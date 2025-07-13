@@ -1,7 +1,7 @@
 package network
 
 import (
-	"chat-ws/src/service"
+	"chat-ws/app/service"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"log"

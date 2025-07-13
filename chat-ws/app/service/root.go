@@ -1,8 +1,8 @@
 package service
 
 import (
-	"chat-ws/src/repository"
-	schema2 "chat-ws/src/types/schema"
+	"chat-ws/app/repository"
+	schema2 "chat-ws/app/types/schema"
 	"log"
 )
 
