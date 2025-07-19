@@ -7,16 +7,17 @@ import (
 
 type Kafka struct {
 	config   *config.Config
-	producer *kafka.Producer
+	consumer *kafka.Consumer
 }
 
 func NewKafka(config *config.Config) (*Kafka, error) {
 	k := &Kafka{config: config}
 	var err error
 	// TODO: Change consumer
-	k.producer, err = kafka.NewProducer(&kafka.ConfigMap{
+	k.consumer, err = kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers": config.Kafka.Url,
-		"client.id":         config.Kafka.ClientId,
+		"group.id":          config.Kafka.GroupId,
+		"auto.offset.reset": "latest",
 		"acks":              "all",
 	})
 	if err != nil {
@@ -25,17 +26,10 @@ func NewKafka(config *config.Config) (*Kafka, error) {
 	return k, nil
 }
 
-func (k *Kafka) Publish(topic string, value []byte, ch chan kafka.Event) (kafka.Event, error) {
-	message := kafka.Message{
-		TopicPartition: kafka.TopicPartition{
-			Topic:     &topic,
-			Partition: kafka.PartitionAny,
-		},
-		Value: value,
-	}
-	err := k.producer.Produce(&message, ch)
-	if err != nil {
-		return nil, err
-	}
-	return <-ch, nil
+func (k *Kafka) Subscribe(topic string) error {
+	return k.consumer.Subscribe(topic, nil)
+}
+
+func (k *Kafka) Poll(timeoutMs int) kafka.Event {
+	return k.consumer.Poll(timeoutMs)
 }

@@ -2,8 +2,6 @@ package network
 
 import (
 	"chat-ws/app/service"
-	"encoding/json"
-	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -54,28 +52,7 @@ func (s *Server) Start() error {
 		if err := s.service.ServerSet(s.ip+s.port, false); err != nil {
 			log.Println(err)
 		}
-
-		type ServerInfoEvent struct {
-			Ip     string
-			Status bool
-		}
-
-		event := ServerInfoEvent{
-			Ip:     s.ip + s.port,
-			Status: false,
-		}
-		v, err := json.Marshal(event)
-		if err != nil {
-			log.Println("Failed to marshal server info event:", err)
-		}
-
-		ch := make(chan kafka.Event, 1)
-		result, err := s.service.Publish("chat", v, ch)
-		if err != nil {
-			log.Println("Failed to publish server info event:", err)
-		}
-		log.Println("Published server info event:", result)
-
+		s.service.PublishServerStatusEvent(s.ip+s.port, false)
 		os.Exit(0) // Exit gracefully
 	}()
 	return s.engine.Run(s.port)
@@ -104,5 +81,6 @@ func (s *Server) setServerInfo() {
 	if err != nil {
 		panic(err.Error())
 	}
+	s.service.PublishServerStatusEvent(s.ip+s.port, true)
 	log.Println("Server info set successfully:", s.ip+s.port)
 }

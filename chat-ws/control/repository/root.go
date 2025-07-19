@@ -3,6 +3,7 @@ package repository
 import (
 	"chat-ws-control/config"
 	"chat-ws-control/repository/kafka"
+	"chat-ws-control/types/table"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql" // MySQL driver
 )
@@ -13,12 +14,6 @@ type Repository struct {
 
 	Kafka *kafka.Kafka
 }
-
-const (
-	room       = "chatting.room"
-	chat       = "chatting.chat"
-	serverInfo = "chatting.server_info"
-)
 
 func NewRepository(c *config.Config) (*Repository, error) {
 	r := &Repository{
@@ -32,4 +27,28 @@ func NewRepository(c *config.Config) (*Repository, error) {
 		return nil, err
 	}
 	return r, nil
+}
+
+func (r *Repository) GetAvailableServers() ([]*table.ServerInfo, error) {
+	qs := "SELECT ip, available FROM chatting.server_info WHERE available = true"
+	cursor, err := r.db.Query(qs)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close()
+
+	var servers []*table.ServerInfo
+	for cursor.Next() {
+		var server table.ServerInfo
+		if err := cursor.Scan(&server.Ip, &server.Available); err != nil {
+			return nil, err
+		}
+		servers = append(servers, &server)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	return servers, nil
 }

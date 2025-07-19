@@ -12,18 +12,17 @@ type Network struct {
 	service *service.Service
 
 	port string
-	ip   string
 }
 
 func NewNetwork(service *service.Service, port string) *Network {
-	s := &Network{
+	n := &Network{
 		engine:  gin.New(),
 		service: service,
 		port:    port,
 	}
-	s.engine.Use(gin.Logger())
-	s.engine.Use(gin.Recovery())
-	s.engine.Use(cors.New(cors.Config{
+	n.engine.Use(gin.Logger())
+	n.engine.Use(gin.Recovery())
+	n.engine.Use(cors.New(cors.Config{
 		AllowWebSockets:  true,
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PUT"},
@@ -31,7 +30,9 @@ func NewNetwork(service *service.Service, port string) *Network {
 		AllowCredentials: true,
 	}))
 
-	return s
+	registerTowerApi(n)
+
+	return n
 }
 
 func (n *Network) Start() error {
