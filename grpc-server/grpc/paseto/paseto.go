@@ -1,8 +1,10 @@
 package paseto
 
 import (
+	"crypto/rand"
 	"github.com/o1egl/paseto"
 	"grpc-server/app/config"
+	auth "grpc-server/grpc/proto"
 )
 
 type Maker struct {
@@ -17,10 +19,16 @@ func NewPasetoMaker(config *config.Config) *Maker {
 	}
 }
 
-func (m *Maker) CreateToken(userID string, duration int64) (string, error) {
-	return "", nil
+func (m *Maker) CreateToken(auth *auth.AuthData) (string, error) {
+	randomBytes := make([]byte, 16)
+	n, err := rand.Read(randomBytes)
+	if err != nil || n != len(randomBytes) {
+		return "", err
+	}
+	return m.Paseto.Encrypt(m.Key, auth, randomBytes)
 }
 
 func (m *Maker) VerifyToken(token string) error {
-	return nil
+	var authData *auth.AuthData
+	return m.Paseto.Decrypt(token, m.Key, authData, nil)
 }

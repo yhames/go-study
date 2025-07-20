@@ -13,6 +13,10 @@ type Config struct {
 	Paseto struct {
 		Key *string
 	}
+
+	Grpc struct {
+		Url *string
+	}
 }
 
 func NewConfig(path string) *Config {
