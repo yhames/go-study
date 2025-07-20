@@ -1,2 +1,8 @@
-[Server]
+[server]
 port = ":8080"
+
+[paseto]
+key = "12345678901234567890123456789012"
+
+[grpc]
+url = "localhost:50051"

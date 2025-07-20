@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"grpc-server/app/config"
@@ -65,13 +66,21 @@ func (s *GrpcServer) VerifyToken(_ context.Context, request *auth.VerifyTokenReq
 	authData, ok := s.tokenVerifyMap[token]
 	if !ok {
 		response.Verify.Status = auth.ResponseType_FAILURE
+		return response, errors.New("token not found")
+	}
+
+	// Verify the token using the paseto maker
+	err := s.pasetoMaker.VerifyToken(token)
+	if err != nil {
+		return nil, errors.New("failed to verify token: " + err.Error())
 	}
 
 	// Check if the token is expired
 	if authData.ExpiresAt < time.Now().Unix() {
 		response.Verify.Status = auth.ResponseType_EXPIRED
-		return response, nil
+		return response, errors.New("token is expired")
 	}
+
 	response.Verify.AuthData = authData
 	response.Verify.Status = auth.ResponseType_SUCCESS
 	return response, nil

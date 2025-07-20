@@ -30,5 +30,5 @@ func (m *Maker) CreateToken(auth *auth.AuthData) (string, error) {
 
 func (m *Maker) VerifyToken(token string) error {
 	var authData *auth.AuthData
-	return m.Paseto.Decrypt(token, m.Key, authData, nil)
+	return m.Paseto.Decrypt(token, m.Key, &authData, nil)
 }
